@@ -13,33 +13,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// The Restaurant model represents a restaurant entity
-model Reustaurant {
+model Restaurant {
   id             String         @id @default(uuid())
   name           String
   slug           String
   description    String
   avatarImageUrl String
   coverImageUrl  String
-  menuCategories MenuCategory[] // One-to-many relation with MenuCategory
-  products       Product[] // One-to-many relation with Product
-  orders         Order[] // One-to-many relation with Order
+  menuCategories MenuCategory[]
+  products       Product[]
+  orders         Order[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
 
-// The MenuCategory model represents a category of the menu in a restaurant
 model MenuCategory {
-  id           String      @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String
-  restaurant   Reustaurant @relation(fields: [restaurantId], references: [id]) // Many-to-one relation with Restaurant
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId String
-  products     Product[] // One-to-many relation with Product
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  products     Product[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
-// The Product model represents a product in a restaurant's menu
 model Product {
   id             String         @id @default(uuid())
   name           String
@@ -47,34 +44,32 @@ model Product {
   price          Float
   imageUrl       String
   ingredients    String[]
-  orderProducts  OrderProduct[] // One-to-many relation with OrderProduct
-  restaurant     Reustaurant    @relation(fields: [restaurantId], references: [id]) // Many-to-one relation with Restaurant
+  orderProducts  OrderProduct[]
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId   String
-  menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id]) // Many-to-one relation with MenuCategory
+  menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id], onDelete: Cascade)
   menuCategoryId String
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
 
-// The Order model represents a customer's order in a restaurant
 model Order {
   id                Int               @id @default(autoincrement())
   total             Float
   status            OrderStatus
   consumptionMethod ConsumptionMethod
-  restaurant        Reustaurant       @relation(fields: [restaurantId], references: [id]) // Many-to-one relation with Restaurant
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId      String
-  orderProducts     OrderProduct[] // One-to-many relation with OrderProduct
+  orderProducts     OrderProduct[]
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 }
 
-// The OrderProduct model represents a product in a customer's order
 model OrderProduct {
   id        String   @id @default(uuid())
-  product   Product  @relation(fields: [productId], references: [id]) // Many-to-one relation with Product
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
-  order     Order    @relation(fields: [orderId], references: [id]) // Many-to-one relation with Order
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   Int
   quantity  Int
   price     Float
@@ -84,13 +79,11 @@ model OrderProduct {
 
 enum OrderStatus {
   PENDING
-  CONFIRMED
   IN_PREPARATION
-  DELIVERED
-  CANCELLED
+  FINISHED
 }
 
 enum ConsumptionMethod {
-  TAKE_AWAY
+  TAKEAWAY
   DINE_IN
 }
